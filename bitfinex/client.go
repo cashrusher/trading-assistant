@@ -11,8 +11,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-
-	"github.com/bitfinexcom/bitfinex-api-go/utils"
+	"github.com/cashrusher/trading-assistant/bitfinex/utils"
 )
 
 const (
@@ -111,7 +110,7 @@ func (c *Client) newAuthenticatedRequest(m string, refURL string, data map[strin
 
 	nonce := utils.GetNonce()
 	payload := map[string]interface{}{
-		"request": "/v2/" + refURL,
+		"request": "/v1/" + refURL,
 		"nonce":   nonce,
 	}
 
@@ -130,20 +129,12 @@ func (c *Client) newAuthenticatedRequest(m string, refURL string, data map[strin
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("X-BFX-APIKEY", c.APIKey)
 	req.Header.Add("X-BFX-PAYLOAD", encoded)
-	//d0a9c1315628d552659844f9d0159f7d544fc050427de95640a1c0632ccaea573b63cae6e32cab24ed449200edb0228d
-	//451ed85fada562fbde6e5d1fc7f6b2c779d3a3112aa7cefadf560675b16651f7222e607680b09eb483d532bf891aa24e
-
-	//eyJub25jZSI6IjE1MDUwNDIyMTAwNzUyNzI0ODIiLCJyZXF1ZXN0IjoiL3YxL2JhbGFuY2VzIn0=
-	//eyJyZXF1ZXN0IjoiL3YyL2F1dGgvci93YWxsZXRzIiwibm9uY2UiOiIxNTA1MDQyMTQyNzQxMDAwMDAwIn0=
-	req.Header.Add("X-BFX-SIGNATURE", c.SignPayload(encoded))
+	req.Header.Add("X-BFX-SIGNATURE", c.signPayload(encoded))
 
 	return req, nil
 }
 
-func (c *Client) SignPayload(payload string) string {
-	//payload:    eyJub25jZSI6IjE1MDUwNDIyMTAwNzUyNzI0ODIiLCJyZXF1ZXN0IjoiL3YxL2JhbGFuY2VzIn0=
-	// APISecret:    4qaFdWxqA6whubyPI92DTWSnDKbiABuMP7CnixmM2Vb
-	//4qaFdWxqA6whubyPI92DTWSnDKbiABuMP7CnixmM2Vb
+func (c *Client) signPayload(payload string) string {
 	sig := hmac.New(sha512.New384, []byte(c.APISecret))
 	sig.Write([]byte(payload))
 	return hex.EncodeToString(sig.Sum(nil))

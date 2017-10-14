@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"reflect"
 
-	"github.com/bitfinexcom/bitfinex-api-go/utils"
 
 	"github.com/gorilla/websocket"
+	"github.com/cashrusher/trading-assistant/bitfinex/utils"
 )
 
 // Pairs available
@@ -282,7 +282,7 @@ func (w *WebSocketService) ConnectPrivate(ch chan TermData) {
 	connectMsg, _ := json.Marshal(&privateConnect{
 		Event:       "auth",
 		APIKey:      w.client.APIKey,
-		AuthSig:     w.client.SignPayload(payload),
+		AuthSig:     w.client.signPayload(payload),
 		AuthPayload: payload,
 	})
 
