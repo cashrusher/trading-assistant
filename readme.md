@@ -1,72 +1,136 @@
-# Bitfinex api for golang
+# Golang version trading assistant for Bitfinex and Kraken.
 
-## Installation
+Support auto trading(buy and sell) and trading history display.
 
-``` bash
-go get github.com/bitfinexcom/bitfinex-api-go
+# Front-end And Backed-end APIs
+
+## Get All Supported currency
+
+GET
+
+    http://localhost:8080/assistant/currencies
+
+Response:
+
+```json
+{
+    "currencies":["XBT","BTH","BCH","ETC","LTC","ICN","GNO","MLN","REP"]
+}
+
 ```
 
-## Usage
+## Buy
 
-### Basic requests
+POST
 
-``` go
-package main
+    http://localhost:8080/assistant/buy
 
-import (
-	"fmt"
-	"github.com/bitfinexcom/bitfinex-api-go"
-)
+Request:
 
-func main() {
-	client := bitfinex.NewClient().Auth("api-key", "api-secret")
-	info, err := client.Account.Info()
+```json
 
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println(info)
-	}
+{
+    "currency":"BTH",
+    "amount":34.9982,
+    "price":887.000293
+}
+
+```
+
+Response:
+
+success
+
+```json
+{
+  "status":"success",
+  "info":{
+    "tradeID":"123455djsdkh33"
+  }
 }
 ```
 
-### Authentication
+Failed
 
-``` go
-func main() {
-	client := bitfinex.NewClient().Auth("api-key", "api-secret")
+```json
+{
+  "status":"failed",
+  "message":"Net work error"
 }
 ```
 
-### Order create
+## Sell
 
-``` go
-order, err := client.Orders.Create(bitfinex.BTCUSD, -0.01, 260.99, bitfinex.ORDER_TYPE_EXCHANGE_LIMIT)
+POST 
 
-if err != nil {
-    return err
-} else {
-    return order
+    http://localhost:8080/assistant/sell
+
+Request:
+
+```json
+
+{
+    "currency":"BTH",
+    "amount":34.9982,
+    "price":887.000293
+}
+
+```
+
+Response:
+
+success
+
+```json
+{
+  "status":"success",
+  "info":{
+    "tradeID":"123455djsdkh33"
+  }
 }
 ```
 
-See [examples](https://github.com/bitfinexcom/bitfinex-api-go/tree/master/examples) and [doc.go](https://github.com/bitfinexcom/bitfinex-api-go/blob/master/doc.go) for more examples.
+Failed
 
-## Testing
-
-All integration tests are stored in `tests/integration` directory. Because these tests are running using live data, there is a much higher probability of false positives in test failures due to network issues, test data having been changed, etc.
-
-Run tests using:
-``` bash
-export BFX_API_KEY="api-key"
-export BFX_API_SECRET="api-secret"
-go test -v ./tests/integration
+```json
+{
+  "status":"failed",
+  "message":"Net work error"
+}
 ```
+      
+## Get All history
 
-## Contributing
+History will display in desc order by time, auto refresh by 5s
 
-1. Fork it (https://github.com/bitfinexcom/bitfinex-api-go/fork)
-2. Create your feature branch (`git checkout -b my-new-feature)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create a new Pull Request
+GET
+
+    http://localhost:8080/assistant/trading-history
+    
+Response
+
+```json
+[
+  {
+    "order":"",
+    "orderType":"",
+    "pair":"",
+    "price":"",
+    "volumeRem":"",
+    "costRem":"",
+    "status":"",
+    "opened":""
+  },
+  {
+   "order":"",
+   "orderType":"",
+   "pair":"",
+   "price":"",
+   "volumeRem":"",
+   "costRem":"",
+   "status":"",
+   "opened":""
+  }
+]
+```
+      
