@@ -6,13 +6,14 @@ import (
 	"encoding/json"
 	"github.com/cashrusher/trading-assistant/assistant"
 )
+
 var service assistant.Service
 
-func init(){
-	service=assistant.InitService()
+func init() {
+	service = assistant.InitService()
 }
 
-func historyHandler(w http.ResponseWriter, r *http.Request) {
+func HistoryHandler(w http.ResponseWriter, r *http.Request) {
 	history, err := service.GetHistory()
 	if err != nil {
 		log.Error(err)

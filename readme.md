@@ -109,27 +109,33 @@ GET
     
 Response
 
+
+
 ```json
 [
   {
-    "order":"",
+    "time":"",
+    "orderID":"",
+    "platform":"",
     "orderType":"",
     "pair":"",
     "price":"",
-    "volumeRem":"",
-    "costRem":"",
-    "status":"",
-    "opened":""
+    "volume":"",
+    "amount":"",
+    "fee":"",
+    "status":""
   },
   {
-   "order":"",
+   "time":"",
+   "orderID":"",
+   "platform":"",
    "orderType":"",
    "pair":"",
    "price":"",
-   "volumeRem":"",
-   "costRem":"",
-   "status":"",
-   "opened":""
+   "volume":"",
+   "amount":"",
+   "fee":"",
+   "status":""
   }
 ]
 ```

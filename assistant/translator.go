@@ -32,28 +32,34 @@ fee_amount	[decimal]	Amount of fees you paid for this trade
 tid	[integer]	unique identification number of the trade
 order_id	[integer]	unique identification number of the parent order of the trade
 */
-func Translate2History(open map[string]krakenapi.Order, close map[string]krakenapi.Order, bitfinexAllOrders []bitfinex.Order) ([]History, error) {
+func Translate2HistoryResponse(open *krakenapi.OpenOrdersResponse, close *krakenapi.ClosedOrdersResponse, bitfinexAllOrders []bitfinex.Order) ([]History, error) {
 	histories := make([]History, 0)
-	for id, o := range open {
-		history := getKrakenHistory(id, o)
-		histories = append(histories, *history)
+	if open != nil {
+		for id, o := range open.Open {
+			history := getKrakenHistory(id, o)
+			histories = append(histories, *history)
+		}
 	}
-	for id, c := range close {
-		history := getKrakenHistory(id, c)
-		histories = append(histories, *history)
+	if close != nil {
+		for id, c := range close.Closed {
+			history := getKrakenHistory(id, c)
+			histories = append(histories, *history)
+		}
 	}
-	for _, order := range bitfinexAllOrders {
-		history := getBitfinexHistory(order)
-		histories = append(histories, *history)
+	if bitfinexAllOrders != nil {
+		for _, order := range bitfinexAllOrders {
+			history := getBitfinexHistory(order)
+			histories = append(histories, *history)
+		}
 	}
-	return nil, nil
+	return histories, nil
 }
 
 func getBitfinexHistory(order bitfinex.Order) *History {
 	history := new(History)
 	history.Platform = "Bitfinex"
 	history.OrderID = strconv.FormatInt(order.ID, 10)
-	timeint, err := strconv.ParseInt(strings.TrimRight(order.Timestamp,".0"), 10, 64)
+	timeint, err := strconv.ParseInt(strings.TrimRight(order.Timestamp, ".0"), 10, 64)
 	if err != nil {
 		log.Error(err)
 		history.Time = time.Now().Format("2006-01-02T15:04:05")

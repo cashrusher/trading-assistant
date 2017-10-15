@@ -8,7 +8,7 @@ import (
 )
 
 type Service interface {
-	GetHistory() (*History, error)
+	GetHistory() ([]History, error)
 	Sell(tradeReq *TradeReq) (*TradeRes, error)
 	Buy(tradeReq *TradeReq) (*TradeRes, error)
 	GetAllCurrencies() (*CurrenciesRes, error)
@@ -25,15 +25,18 @@ type ServiceImpl struct {
 	bitfinex *bitfinex.Client
 }
 
-func (s *ServiceImpl) GetHistory() (*History, error) {
+func (s *ServiceImpl) GetHistory() ([]History, error) {
 	//krakenTradeHistory, err := s.kraken.Trades(krakenapi.XETHZUSD, 0)
 	krakenOpenOrders, err := s.kraken.OpenOrders(nil)
 	if err != nil {
-		return nil, err
+		log.Error(err)
+		//return nil, err
 	}
 	krakenClosedOrders, err := s.kraken.ClosedOrders(nil)
 	if err != nil {
-		return nil, err
+		log.Error(err)
+
+		//return nil, err
 	}
 	//https://api.bitfinex.com/v1/mytrades?symbol=ETHUSD&timestamp=0&limit_trades=32
 	util.PrintDebugJson(krakenOpenOrders)
@@ -41,11 +44,11 @@ func (s *ServiceImpl) GetHistory() (*History, error) {
 	bitfinexAllOrders, err := s.bitfinex.Orders.All()
 	if err != nil {
 		log.Error(err)
-		return nil, err
+		//return nil, err
 	}
-	history, err := Translate2History(krakenOpenOrders.Open, krakenClosedOrders.Closed, bitfinexAllOrders)
-	util.PrintDebugJson(history)
-	return nil, nil
+	histories, err := Translate2HistoryResponse(krakenOpenOrders, krakenClosedOrders, bitfinexAllOrders)
+	util.PrintDebugJson(histories)
+	return histories, nil
 }
 
 func (s *ServiceImpl) Sell(tradeReq *TradeReq) (*TradeRes, error) {
