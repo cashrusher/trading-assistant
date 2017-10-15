@@ -54,5 +54,4 @@ type TradeReq struct {
 type TradeRes struct {
 }
 
-type CurrenciesRes struct {
-}
+type CurrenciesRes []string

@@ -5,13 +5,14 @@ import (
 	"github.com/cashrusher/trading-assistant/bitfinex"
 	"git.derbysoft.tm/warrior/derbysoft-common-go.git/util"
 	"derbysoft.com/derbysoft-rpc-go/log"
+	"strings"
 )
 
 type Service interface {
 	GetHistory() ([]History, error)
 	Sell(tradeReq *TradeReq) (*TradeRes, error)
 	Buy(tradeReq *TradeReq) (*TradeRes, error)
-	GetAllCurrencies() (*CurrenciesRes, error)
+	GetAllCurrencies(platform string) (CurrenciesRes, error)
 }
 
 func InitService() Service {
@@ -59,6 +60,90 @@ func (s *ServiceImpl) Buy(tradeReq *TradeReq) (*TradeRes, error) {
 	return nil, nil
 }
 
-func (s *ServiceImpl) GetAllCurrencies() (*CurrenciesRes, error) {
-	return nil, nil
+func (s *ServiceImpl) GetAllCurrencies(platform string) (CurrenciesRes, error) {
+	currencies := make([]string, 0)
+	if platform == "kraken" {
+
+		krakenPairs, err := s.kraken.AssetPairs()
+		if err != nil {
+			log.Error(err)
+		}
+		currencies = append(currencies, krakenPairs.BCHEUR.Altname)
+		currencies = append(currencies, krakenPairs.DASHEUR.Altname)
+		currencies = append(currencies, krakenPairs.DASHUSD.Altname)
+		currencies = append(currencies, krakenPairs.DASHXBT.Altname)
+		currencies = append(currencies, krakenPairs.EOSETH.Altname)
+		currencies = append(currencies, krakenPairs.EOSEUR.Altname)
+		currencies = append(currencies, krakenPairs.EOSUSD.Altname)
+		currencies = append(currencies, krakenPairs.EOSXBT.Altname)
+		currencies = append(currencies, krakenPairs.GNOETH.Altname)
+		currencies = append(currencies, krakenPairs.GNOEUR.Altname)
+		currencies = append(currencies, krakenPairs.GNOUSD.Altname)
+		currencies = append(currencies, krakenPairs.GNOXBT.Altname)
+		currencies = append(currencies, krakenPairs.USDTZUSD.Altname)
+		currencies = append(currencies, krakenPairs.XETCXETH.Altname)
+		currencies = append(currencies, krakenPairs.XETCXXBT.Altname)
+		currencies = append(currencies, krakenPairs.XETCZEUR.Altname)
+		currencies = append(currencies, krakenPairs.XETCXUSD.Altname)
+		currencies = append(currencies, krakenPairs.XETHXXBT.Altname)
+		currencies = append(currencies, krakenPairs.XETHZCAD.Altname)
+		currencies = append(currencies, krakenPairs.XETHZEUR.Altname)
+		currencies = append(currencies, krakenPairs.XETHZGBP.Altname)
+		currencies = append(currencies, krakenPairs.XETHZJPY.Altname)
+		currencies = append(currencies, krakenPairs.XETHZUSD.Altname)
+		currencies = append(currencies, krakenPairs.XICNXETH.Altname)
+		currencies = append(currencies, krakenPairs.XICNXXBT.Altname)
+		currencies = append(currencies, krakenPairs.XLTCXXBT.Altname)
+		currencies = append(currencies, krakenPairs.XLTCZEUR.Altname)
+		currencies = append(currencies, krakenPairs.XLTCZUSD.Altname)
+		currencies = append(currencies, krakenPairs.XMLNXETH.Altname)
+		currencies = append(currencies, krakenPairs.XMLNXXBT.Altname)
+		currencies = append(currencies, krakenPairs.XREPXETH.Altname)
+		currencies = append(currencies, krakenPairs.XREPXXBT.Altname)
+		currencies = append(currencies, krakenPairs.XREPZEUR.Altname)
+		currencies = append(currencies, krakenPairs.XREPZUSD.Altname)
+		currencies = append(currencies, krakenPairs.XXBTZCAD.Altname)
+		currencies = append(currencies, krakenPairs.XXBTZEUR.Altname)
+		currencies = append(currencies, krakenPairs.XXBTZGBP.Altname)
+		currencies = append(currencies, krakenPairs.XXBTZJPY.Altname)
+		currencies = append(currencies, krakenPairs.XXBTZUSD.Altname)
+		currencies = append(currencies, krakenPairs.XXDGXXBT.Altname)
+		currencies = append(currencies, krakenPairs.XXLMXXBT.Altname)
+		currencies = append(currencies, krakenPairs.XXLMZEUR.Altname)
+		currencies = append(currencies, krakenPairs.XXLMZUSD.Altname)
+		currencies = append(currencies, krakenPairs.XXMRXXBT.Altname)
+		currencies = append(currencies, krakenPairs.XXMRZEUR.Altname)
+		currencies = append(currencies, krakenPairs.XXMRZUSD.Altname)
+		currencies = append(currencies, krakenPairs.XXRPXXBT.Altname)
+		currencies = append(currencies, krakenPairs.XXRPZCAD.Altname)
+		currencies = append(currencies, krakenPairs.XXRPZEUR.Altname)
+		currencies = append(currencies, krakenPairs.XXRPZJPY.Altname)
+		currencies = append(currencies, krakenPairs.XXRPZUSD.Altname)
+		currencies = append(currencies, krakenPairs.XZECXXBT.Altname)
+		currencies = append(currencies, krakenPairs.XZECZEUR.Altname)
+		currencies = append(currencies, krakenPairs.XZECZUSD.Altname)
+		return deleteEmptyCurrency(currencies), nil
+	} else if platform == "bitfinex" {
+		bitfinexPairs, err := s.bitfinex.Pairs.All()
+		if err != nil {
+			log.Error(err)
+		}
+		currencies = append(currencies, bitfinexPairs...)
+		util.PrintDebugJson(bitfinexPairs)
+		return deleteEmptyCurrency(currencies), nil
+	} else {
+		return []string{}, nil
+	}
+
+}
+
+func deleteEmptyCurrency(currencies []string) []string {
+	result := make([]string, 0)
+	for _, currency := range currencies {
+		if strings.TrimSpace(currency) == "" {
+			continue
+		}
+		result = append(result, currency)
+	}
+	return result
 }

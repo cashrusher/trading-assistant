@@ -4,11 +4,26 @@ Support auto trading(buy and sell) and trading history display.
 
 # Front-end And Backed-end APIs
 
-## Get All Supported currency
+## Get kraken Supported currency
 
 GET
 
-    http://localhost:8080/assistant/currencies
+    http://localhost:8080/assistant/currencies/kraken
+
+Response:
+
+```json
+{
+    "currencies":["XBT","BTH","BCH","ETC","LTC","ICN","GNO","MLN","REP"]
+}
+
+```
+
+## Get bitfinex Supported currency
+
+GET
+
+    http://localhost:8080/assistant/currencies/bitfinex
 
 Response:
 
