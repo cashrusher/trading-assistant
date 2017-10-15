@@ -47,7 +47,6 @@ func KrakenCurrencyHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(h)
 }
 
-
 func BitfinexCurrencyHandler(w http.ResponseWriter, r *http.Request) {
 	currencies, err := service.GetAllCurrencies("bitfinex")
 	if err != nil {
@@ -60,4 +59,16 @@ func BitfinexCurrencyHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(createErrorResponse(err))
 	}
 	w.Write(h)
+}
+
+/**
+{
+    "platform":"kraken", //can be 'kraken' or 'bitfinex'
+    "currency":"BTH", // it's the currency returned by the currencies api
+    "amount":34.9982,
+    "price":887.000293
+}
+*/
+func BuyHandler(w http.ResponseWriter, r *http.Request) {
+
 }

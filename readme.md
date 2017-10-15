@@ -45,11 +45,11 @@ Request:
 ```json
 
 {
-    "currency":"BTH",
+    "platform":"kraken",  //can be 'kraken' or 'bitfinex'
+    "currency":"BTH", // it's the currency returned by the currencies api
     "amount":34.9982,
     "price":887.000293
 }
-
 ```
 
 Response:
@@ -85,7 +85,8 @@ Request:
 ```json
 
 {
-    "currency":"BTH",
+    "platform":"kraken", //can be 'kraken' or 'bitfinex'
+    "currency":"BTH", // it's the currency returned by the currencies api
     "amount":34.9982,
     "price":887.000293
 }
