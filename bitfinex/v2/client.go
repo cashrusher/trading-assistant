@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/cashrusher/trading-assistant/utils"
 )
 
 const (
@@ -34,7 +35,7 @@ type Client struct {
 	APISecret string
 
 	// Services
-	Websocket *bfxWebsocket
+	//Websocket *bfxWebsocket
 	Orders    *OrderService
 	Platform  *PlatformService
 	Positions *PositionService
@@ -50,7 +51,7 @@ func NewClientWithHTTP(h *http.Client) *Client {
 
 	c := &Client{BaseURL: baseURL, HTTPClient: h}
 
-	c.Websocket = newBfxWebsocket(c, WebSocketURL)
+	//c.Websocket = newBfxWebsocket(c, WebSocketURL)
 	c.Orders = &OrderService{client: c}
 	c.Platform = &PlatformService{client: c}
 	c.Positions = &PositionService{client: c}
@@ -112,7 +113,7 @@ func (c *Client) newAuthenticatedRequest(m string, refURL string, data map[strin
 		return nil, err
 	}
 
-	nonce := GetNonce()
+	nonce := utils.GetNonce()
 	message := "/api/v2/" + refURL + nonce + string(b)
 	sig := c.sign(message)
 

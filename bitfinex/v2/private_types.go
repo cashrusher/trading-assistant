@@ -118,85 +118,85 @@ const (
 )
 
 // Order as returned from the bitfinex websocket service.
-//type Order struct {
-//	ID            int64
-//	GID           int64
-//	CID           int64
-//	Symbol        string
-//	MTSCreated    int64
-//	MTSUpdated    int64
-//	Amount        float64
-//	AmountOrig    float64
-//	Type          string
-//	TypePrev      string
-//	Flags         int64
-//	Status        OrderStatus
-//	Price         float64
-//	PriceAvg      float64
-//	PriceTrailing float64
-//	PriceAuxLimit float64
-//	Notify        bool
-//	Hidden        bool
-//	PlacedID      int64
-//}
+type Order struct {
+	ID            int64
+	GID           int64
+	CID           int64
+	Symbol        string
+	MTSCreated    int64
+	MTSUpdated    int64
+	Amount        float64
+	AmountOrig    float64
+	Type          string
+	TypePrev      string
+	Flags         int64
+	Status        OrderStatus
+	Price         float64
+	PriceAvg      float64
+	PriceTrailing float64
+	PriceAuxLimit float64
+	Notify        bool
+	Hidden        bool
+	PlacedID      int64
+}
 
 // OrderFromRaw takes the raw list of values as returned from the websocket
 // service and tries to convert it into an Order.
-//func orderFromRaw(raw []interface{}) (o Order, err error) {
-//	if len(raw) < 26 {
-//		return o, fmt.Errorf("data slice too short for order: %#v", raw)
-//	}
-//
-//	// TODO: API docs say ID, GID, CID, MTS_CREATE, MTS_UPDATE are int but API returns float
-//	o = Order{
-//		ID:            int64(f64ValOrZero(raw[0])),
-//		GID:           int64(f64ValOrZero(raw[1])),
-//		CID:           int64(f64ValOrZero(raw[2])),
-//		Symbol:        sValOrEmpty(raw[3]),
-//		MTSCreated:    int64(f64ValOrZero(raw[4])),
-//		MTSUpdated:    int64(f64ValOrZero(raw[5])),
-//		Amount:        f64ValOrZero(raw[6]),
-//		AmountOrig:    f64ValOrZero(raw[7]),
-//		Type:          sValOrEmpty(raw[8]),
-//		TypePrev:      sValOrEmpty(raw[9]),
-//		Flags:         i64ValOrZero(raw[12]),
-//		Status:        OrderStatus(sValOrEmpty(raw[13])),
-//		Price:         f64ValOrZero(raw[16]),
-//		PriceAvg:      f64ValOrZero(raw[17]),
-//		PriceTrailing: f64ValOrZero(raw[18]),
-//		PriceAuxLimit: f64ValOrZero(raw[19]),
-//		Notify:        bValOrFalse(raw[23]),
-//		Hidden:        bValOrFalse(raw[24]),
-//		PlacedID:      i64ValOrZero(raw[25]),
-//	}
-//
-//	return
-//}
-//
-//// OrderSnapshotFromRaw takes a raw list of values as returned from the websocket
-//// service and tries to convert it into an OrderSnapshot.
-//func orderSnapshotFromRaw(raw []interface{}) (os OrderSnapshot, err error) {
-//	if len(raw) == 0 {
-//		return
-//	}
-//
-//	switch raw[0].(type) {
-//	case []interface{}:
-//		for _, v := range raw {
-//			if l, ok := v.([]interface{}); ok {
-//				o, err := orderFromRaw(l)
-//				if err != nil {
-//					return os, err
-//				}
-//				os = append(os, o)
-//			}
-//		}
-//	default:
-//		return os, fmt.Errorf("not an order snapshot")
-//	}
-//
-//	return
-//}
+func orderFromRaw(raw []interface{}) (o Order, err error) {
+	if len(raw) < 26 {
+		return o, fmt.Errorf("data slice too short for order: %#v", raw)
+	}
+
+	// TODO: API docs say ID, GID, CID, MTS_CREATE, MTS_UPDATE are int but API returns float
+	o = Order{
+		ID:            int64(f64ValOrZero(raw[0])),
+		GID:           int64(f64ValOrZero(raw[1])),
+		CID:           int64(f64ValOrZero(raw[2])),
+		Symbol:        sValOrEmpty(raw[3]),
+		MTSCreated:    int64(f64ValOrZero(raw[4])),
+		MTSUpdated:    int64(f64ValOrZero(raw[5])),
+		Amount:        f64ValOrZero(raw[6]),
+		AmountOrig:    f64ValOrZero(raw[7]),
+		Type:          sValOrEmpty(raw[8]),
+		TypePrev:      sValOrEmpty(raw[9]),
+		Flags:         i64ValOrZero(raw[12]),
+		Status:        OrderStatus(sValOrEmpty(raw[13])),
+		Price:         f64ValOrZero(raw[16]),
+		PriceAvg:      f64ValOrZero(raw[17]),
+		PriceTrailing: f64ValOrZero(raw[18]),
+		PriceAuxLimit: f64ValOrZero(raw[19]),
+		Notify:        bValOrFalse(raw[23]),
+		Hidden:        bValOrFalse(raw[24]),
+		PlacedID:      i64ValOrZero(raw[25]),
+	}
+
+	return
+}
+
+// OrderSnapshotFromRaw takes a raw list of values as returned from the websocket
+// service and tries to convert it into an OrderSnapshot.
+func orderSnapshotFromRaw(raw []interface{}) (os OrderSnapshot, err error) {
+	if len(raw) == 0 {
+		return
+	}
+
+	switch raw[0].(type) {
+	case []interface{}:
+		for _, v := range raw {
+			if l, ok := v.([]interface{}); ok {
+				o, err := orderFromRaw(l)
+				if err != nil {
+					return os, err
+				}
+				os = append(os, o)
+			}
+		}
+	default:
+		return os, fmt.Errorf("not an order snapshot")
+	}
+
+	return
+}
 
 // OrderSnapshot is a collection of Orders that would usually be sent on
 // inital connection.
@@ -896,52 +896,52 @@ type Notification struct {
 	Status     string
 	Text       string
 }
-//
-//func notificationFromRaw(raw []interface{}) (o Notification, err error) {
-//	if len(raw) < 8 {
-//		return o, fmt.Errorf("data slice too short for notification: %#v", raw)
-//	}
-//
-//	o = Notification{
-//		MTS:       i64ValOrZero(raw[0]),
-//		Type:      sValOrEmpty(raw[1]),
-//		MessageID: i64ValOrZero(raw[2]),
-//		//NotifyInfo: raw[4],
-//		Code:   i64pValOrNil(raw[5]),
-//		Status: sValOrEmpty(raw[6]),
-//		Text:   sValOrEmpty(raw[7]),
-//	}
-//
-//	var nraw []interface{}
-//	nraw = raw[4].([]interface{})
-//	switch o.Type {
-//	case "on-req":
-//		on, err := orderFromRaw(nraw)
-//		if err != nil {
-//			return o, err
-//		}
-//		o.NotifyInfo = OrderNew(on)
-//	case "oc-req":
-//		oc, err := orderFromRaw(nraw)
-//		if err != nil {
-//			return o, err
-//		}
-//		o.NotifyInfo = OrderCancel(oc)
-//	case "fon-req":
-//		fon, err := offerFromRaw(nraw)
-//		if err != nil {
-//			return o, err
-//		}
-//		o.NotifyInfo = FundingOfferNew(fon)
-//	case "foc-req":
-//		foc, err := offerFromRaw(nraw)
-//		if err != nil {
-//			return o, err
-//		}
-//		o.NotifyInfo = FundingOfferCancel(foc)
-//	case "uca":
-//		o.NotifyInfo = raw[4]
-//	}
-//
-//	return
-//}
+
+func notificationFromRaw(raw []interface{}) (o Notification, err error) {
+	if len(raw) < 8 {
+		return o, fmt.Errorf("data slice too short for notification: %#v", raw)
+	}
+
+	o = Notification{
+		MTS:       i64ValOrZero(raw[0]),
+		Type:      sValOrEmpty(raw[1]),
+		MessageID: i64ValOrZero(raw[2]),
+		//NotifyInfo: raw[4],
+		Code:   i64pValOrNil(raw[5]),
+		Status: sValOrEmpty(raw[6]),
+		Text:   sValOrEmpty(raw[7]),
+	}
+
+	var nraw []interface{}
+	nraw = raw[4].([]interface{})
+	switch o.Type {
+	case "on-req":
+		on, err := orderFromRaw(nraw)
+		if err != nil {
+			return o, err
+		}
+		o.NotifyInfo = OrderNew(on)
+	case "oc-req":
+		oc, err := orderFromRaw(nraw)
+		if err != nil {
+			return o, err
+		}
+		o.NotifyInfo = OrderCancel(oc)
+	case "fon-req":
+		fon, err := offerFromRaw(nraw)
+		if err != nil {
+			return o, err
+		}
+		o.NotifyInfo = FundingOfferNew(fon)
+	case "foc-req":
+		foc, err := offerFromRaw(nraw)
+		if err != nil {
+			return o, err
+		}
+		o.NotifyInfo = FundingOfferCancel(foc)
+	case "uca":
+		o.NotifyInfo = raw[4]
+	}
+
+	return
+}

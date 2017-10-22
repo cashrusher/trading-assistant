@@ -40,13 +40,12 @@ func (s *ServiceImpl) GetHistory() ([]History, error) {
 	krakenClosedOrders, err := s.kraken.ClosedOrders(nil)
 	if err != nil {
 		log.Error(err)
-
 		//return nil, err
 	}
 	//https://api.bitfinex.com/v1/mytrades?symbol=ETHUSD&timestamp=0&limit_trades=32
 	util.PrintDebugJson(krakenOpenOrders)
 	util.PrintDebugJson(krakenClosedOrders)
-	bitfinexAllOrders, err := s.bitfinexV2.Orders.All("")
+	bitfinexAllOrders, err := s.bitfinexV2.Orders.History("")
 	if err != nil {
 		log.Error(err)
 		//return nil, err
@@ -78,8 +77,6 @@ func (s *ServiceImpl) trade(tradeReq *TradeReq, sellOrBuy string) (*TradeRes, er
 		}
 		return Translate2TradeRes(addOrderResponse)
 	} else if tradeReq.Platform == "bitfinex" {
-		amount:=util.Float64ToString(tradeReq.Amount)
-		price:=util.Float64ToString(tradeReq.Price)
 		if sellOrBuy == "sell" {
 			tradeReq.Amount = float64(0) - tradeReq.Amount
 		}
@@ -93,6 +90,7 @@ func (s *ServiceImpl) trade(tradeReq *TradeReq, sellOrBuy string) (*TradeRes, er
 	}
 	return nil, errors.New("Unsupported action! ")
 }
+
 func (s *ServiceImpl) GetAllCurrencies(platform string) (CurrenciesRes, error) {
 	currencies := make([]string, 0)
 	if platform == "kraken" {

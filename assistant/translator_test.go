@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"derbysoft.com/derbysoft-rpc-go/log"
 	"git.derbysoft.tm/warrior/derbysoft-common-go.git/util"
-	"github.com/cashrusher/trading-assistant/bitfinex"
+	"github.com/cashrusher/trading-assistant/bitfinex/v1"
 )
 
 func TestTranslate2KrakenHistory(t *testing.T) {
@@ -49,7 +49,7 @@ func TestTranslate2KrakenHistory(t *testing.T) {
 }
 
 func TestTranslate2BitfinexHistory(t *testing.T) {
-	o := &bitfinex.Order{}
+	o := &v1.Order{}
 	str := `{
   "id":448411365,
   "symbol":"btcusd",
@@ -71,6 +71,6 @@ func TestTranslate2BitfinexHistory(t *testing.T) {
 		log.Error(err)
 	}
 	util.PrintDebugJson(o)
-	h := getBitfinexHistory(*o)
-	util.PrintDebugJson(h)
+	//h := getBitfinexHistory(*o)
+	//util.PrintDebugJson(h)
 }

@@ -6,9 +6,8 @@ import (
 	"time"
 	"git.derbysoft.tm/warrior/derbysoft-common-go.git/util"
 	"strconv"
-	"strings"
-
 	"github.com/cashrusher/trading-assistant/bitfinex/v1"
+	"github.com/cashrusher/trading-assistant/bitfinex/v2"
 )
 
 func Translate2TradeRes(addOrderRes *krakenapi.AddOrderResponse) (*TradeRes, error) {
@@ -47,7 +46,7 @@ fee_amount	[decimal]	Amount of fees you paid for this trade
 tid	[integer]	unique identification number of the trade
 order_id	[integer]	unique identification number of the parent order of the trade
 */
-func Translate2HistoryResponse(open *krakenapi.OpenOrdersResponse, close *krakenapi.ClosedOrdersResponse, bitfinexAllOrders []v1.Order) ([]History, error) {
+func Translate2HistoryResponse(open *krakenapi.OpenOrdersResponse, close *krakenapi.ClosedOrdersResponse, bitfinexAllOrders []v2.Order) ([]History, error) {
 	histories := make([]History, 0)
 	if open != nil {
 		for id, o := range open.Open {
@@ -70,42 +69,18 @@ func Translate2HistoryResponse(open *krakenapi.OpenOrdersResponse, close *kraken
 	return histories, nil
 }
 
-func getBitfinexHistory(order v1.Order) *History {
+func getBitfinexHistory(order v2.Order) *History {
 	history := new(History)
 	history.Platform = "Bitfinex"
 	history.OrderID = strconv.FormatInt(order.ID, 10)
-	timeint, err := strconv.ParseInt(strings.TrimRight(order.Timestamp, ".0"), 10, 64)
-	if err != nil {
-		log.Error(err)
-		history.Time = time.Now().Format("2006-01-02T15:04:05")
-	} else {
-		timeObject := time.Unix(timeint, 0)
-		history.Time = timeObject.Format("2006-01-02 15:04:05")
-	}
-	volume, err := util.StringToFloat64(order.ExecutedAmount)
-	if err != nil {
-		log.Error(err)
-	}
-	history.Volume = volume
-	amount, err := util.StringToFloat64(order.AvgExecutionPrice)
-	if err != nil {
-		log.Error(err)
-	}
-	history.Amount = amount
-	price, err := util.StringToFloat64(order.Price)
-	if err != nil {
-		log.Error(err)
-	}
-	history.Price = price
+	timeObject := time.Unix(order.MTSCreated, 0)
+	history.Time = timeObject.Format("2006-01-02 15:04:05")
+	history.Volume = order.Amount
+	history.Amount = order.AmountOrig
+	history.Price = order.Price
 	history.Fee = 0
 	history.OrderType = order.Type
-	if order.IsLive {
-		history.Status = "Open"
-	} else if order.IsCanceled {
-		history.Status = "Close"
-	} else if order.IsHidden {
-		history.Status = "Hidden"
-	}
+	history.Status = string(v2.OrderStatusActive)
 	history.Pair = order.Symbol
 	return history
 }

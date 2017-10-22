@@ -52,7 +52,7 @@ func TestServiceImpl_Sell(t *testing.T) {
 		//sell 0.02ETH in bitfinex
 		req := new(TradeReq)
 		req.Price = 0.01
-		req.Amount = 0.02
+		req.Amount = 0.2
 		req.Platform = "bitfinex"
 		req.Currency = "ethusd"
 		res, err := service.Sell(req)
@@ -82,9 +82,9 @@ func TestServiceImpl_Buy(t *testing.T) {
 		//sell 0.02ETH in bitfinex
 		req:=new(TradeReq)
 		req.Price=0.01
-		req.Amount=0.02
+		req.Amount=0.2
 		req.Platform="bitfinex"
-		req.Currency="ethusd"
+		req.Currency="ETHUSD"
 		res,err:=service.Buy(req)
 		if err!=nil{
 			log.Error(err)

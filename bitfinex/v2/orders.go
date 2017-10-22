@@ -53,10 +53,9 @@ func (s *OrderService) Status(orderID int64) (o Order, err error) {
 
 // All returns all orders for the authenticated account.
 func (s *OrderService) History(symbol string) (OrderSnapshot, error) {
-	if symbol == "" {
-		return nil, fmt.Errorf("symbol cannot be empty")
-	}
-
+	//if symbol == "" {
+	//	return nil, fmt.Errorf("symbol cannot be empty")
+	//}
 	req, err := s.client.newAuthenticatedRequest("POST", path.Join("orders", symbol, "hist"), nil)
 	if err != nil {
 		return nil, err
