@@ -2,10 +2,12 @@ package assistant
 
 import (
 	"github.com/kraken-go-api-client"
-	"github.com/cashrusher/trading-assistant/bitfinex"
 	"git.derbysoft.tm/warrior/derbysoft-common-go.git/util"
 	"derbysoft.com/derbysoft-rpc-go/log"
 	"strings"
+	"errors"
+	"github.com/cashrusher/trading-assistant/bitfinex/v2"
+	"github.com/cashrusher/trading-assistant/bitfinex/v1"
 )
 
 type Service interface {
@@ -17,13 +19,15 @@ type Service interface {
 
 func InitService() Service {
 	kraken := krakenapi.New("RNL8qrMdKy+wRwCCR7cm5xHN09Bsew3snZIN3aW3rlnLPvtHTkCKvS+u", "WP90951w5I9uFCLabh8x0SqaKaqeTCe+orIez89Io/68R8i9Xh5lnQeSOsXtlTpf4KJ+ryf8kRMFHyRzuBpfSg==")
-	bitfinex := bitfinex.NewClient().Auth("eRNLi8wYH0SXncyDUkfmWs99CVvjqSUnQ6KcBqnwhDt", "4qaFdWxqA6whubyPI92DTWSnDKbiABuMP7CnixmM2Vb")
-	return &ServiceImpl{kraken: kraken, bitfinex: bitfinex}
+	bitfinexV2 := v2.NewClient().Credentials("eRNLi8wYH0SXncyDUkfmWs99CVvjqSUnQ6KcBqnwhDt", "4qaFdWxqA6whubyPI92DTWSnDKbiABuMP7CnixmM2Vb")
+	bitfinexV1 := v1.NewClient().Auth("eRNLi8wYH0SXncyDUkfmWs99CVvjqSUnQ6KcBqnwhDt", "4qaFdWxqA6whubyPI92DTWSnDKbiABuMP7CnixmM2Vb")
+	return &ServiceImpl{kraken: kraken, bitfinexV1: bitfinexV1, bitfinexV2: bitfinexV2}
 }
 
 type ServiceImpl struct {
-	kraken   *krakenapi.KrakenApi
-	bitfinex *bitfinex.Client
+	kraken     *krakenapi.KrakenApi
+	bitfinexV1 *v1.Client
+	bitfinexV2 *v2.Client
 }
 
 func (s *ServiceImpl) GetHistory() ([]History, error) {
@@ -42,24 +46,53 @@ func (s *ServiceImpl) GetHistory() ([]History, error) {
 	//https://api.bitfinex.com/v1/mytrades?symbol=ETHUSD&timestamp=0&limit_trades=32
 	util.PrintDebugJson(krakenOpenOrders)
 	util.PrintDebugJson(krakenClosedOrders)
-	bitfinexAllOrders, err := s.bitfinex.Orders.All()
+	bitfinexAllOrders, err := s.bitfinexV2.Orders.All("")
 	if err != nil {
 		log.Error(err)
 		//return nil, err
 	}
+	log.Debug(bitfinexAllOrders)
+	util.PrintDebugJson(bitfinexAllOrders)
 	histories, err := Translate2HistoryResponse(krakenOpenOrders, krakenClosedOrders, bitfinexAllOrders)
 	util.PrintDebugJson(histories)
 	return histories, nil
 }
 
 func (s *ServiceImpl) Sell(tradeReq *TradeReq) (*TradeRes, error) {
-	return nil, nil
+	return s.trade(tradeReq, "sell")
 }
 
 func (s *ServiceImpl) Buy(tradeReq *TradeReq) (*TradeRes, error) {
-	return nil, nil
+	return s.trade(tradeReq, "buy")
 }
 
+func (s *ServiceImpl) trade(tradeReq *TradeReq, sellOrBuy string) (*TradeRes, error) {
+	if tradeReq.Platform == "kraken" {
+		volume := util.Float64ToString(tradeReq.Amount)
+		price := util.Float64ToString(tradeReq.Price)
+		args := make(map[string]string)
+		args["price"] = price
+		addOrderResponse, err := s.kraken.AddOrder(tradeReq.Currency, sellOrBuy, "market", volume, args)
+		if err != nil {
+			return nil, err
+		}
+		return Translate2TradeRes(addOrderResponse)
+	} else if tradeReq.Platform == "bitfinex" {
+		amount:=util.Float64ToString(tradeReq.Amount)
+		price:=util.Float64ToString(tradeReq.Price)
+		if sellOrBuy == "sell" {
+			tradeReq.Amount = float64(0) - tradeReq.Amount
+		}
+		order, err := s.bitfinexV1.Orders.Create(tradeReq.Currency, tradeReq.Amount, tradeReq.Price, v1.OrderTypeMarket)
+
+		//order,err:=s.bitfinexV1.Orders.Create(amount,price,tradeReq.Currency)
+		if err != nil {
+			return nil, err
+		}
+		return Translate2Order(order)
+	}
+	return nil, errors.New("Unsupported action! ")
+}
 func (s *ServiceImpl) GetAllCurrencies(platform string) (CurrenciesRes, error) {
 	currencies := make([]string, 0)
 	if platform == "kraken" {
@@ -124,7 +157,7 @@ func (s *ServiceImpl) GetAllCurrencies(platform string) (CurrenciesRes, error) {
 		currencies = append(currencies, krakenPairs.XZECZUSD.Altname)
 		return deleteEmptyCurrency(currencies), nil
 	} else if platform == "bitfinex" {
-		bitfinexPairs, err := s.bitfinex.Pairs.All()
+		bitfinexPairs, err := s.bitfinexV1.Pairs.All()
 		if err != nil {
 			log.Error(err)
 		}

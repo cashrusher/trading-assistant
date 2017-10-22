@@ -1,14 +1,29 @@
 package assistant
 
 import (
-	"github.com/cashrusher/trading-assistant/bitfinex"
 	"github.com/kraken-go-api-client"
 	"derbysoft.com/derbysoft-rpc-go/log"
 	"time"
 	"git.derbysoft.tm/warrior/derbysoft-common-go.git/util"
 	"strconv"
 	"strings"
+
+	"github.com/cashrusher/trading-assistant/bitfinex/v1"
 )
+
+func Translate2TradeRes(addOrderRes *krakenapi.AddOrderResponse) (*TradeRes, error) {
+	tradeRes := new(TradeRes)
+	tradeRes.Info.TradeID = addOrderRes.TransactionIds[0]
+	tradeRes.Status = "success"
+	return tradeRes, nil
+}
+
+func Translate2Order(order *v1.Order) (*TradeRes, error) {
+	tradeRes := new(TradeRes)
+	tradeRes.Status = "success"
+	tradeRes.Info.TradeID = string(order.ID)
+	return tradeRes, nil
+}
 
 /**
 Price         string
@@ -32,7 +47,7 @@ fee_amount	[decimal]	Amount of fees you paid for this trade
 tid	[integer]	unique identification number of the trade
 order_id	[integer]	unique identification number of the parent order of the trade
 */
-func Translate2HistoryResponse(open *krakenapi.OpenOrdersResponse, close *krakenapi.ClosedOrdersResponse, bitfinexAllOrders []bitfinex.Order) ([]History, error) {
+func Translate2HistoryResponse(open *krakenapi.OpenOrdersResponse, close *krakenapi.ClosedOrdersResponse, bitfinexAllOrders []v1.Order) ([]History, error) {
 	histories := make([]History, 0)
 	if open != nil {
 		for id, o := range open.Open {
@@ -55,7 +70,7 @@ func Translate2HistoryResponse(open *krakenapi.OpenOrdersResponse, close *kraken
 	return histories, nil
 }
 
-func getBitfinexHistory(order bitfinex.Order) *History {
+func getBitfinexHistory(order v1.Order) *History {
 	history := new(History)
 	history.Platform = "Bitfinex"
 	history.OrderID = strconv.FormatInt(order.ID, 10)

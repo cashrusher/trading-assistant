@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"git.derbysoft.tm/warrior/derbysoft-common-go.git/log"
+	"io/ioutil"
+	"errors"
 )
 
 var service Service
@@ -70,5 +72,38 @@ func BitfinexCurrencyHandler(w http.ResponseWriter, r *http.Request) {
 }
 */
 func BuyHandler(w http.ResponseWriter, r *http.Request) {
-
+	request, err := getRequest(r)
+	if err != nil {
+		w.Write(createErrorResponse(err))
+		return
+	}
+	treq := new(TradeReq)
+	if err := json.Unmarshal(request, treq); err != nil {
+		w.Write(createErrorResponse(err))
+		return
+	}
+	tres, err := service.Buy(treq)
+	if err != nil {
+		w.Write(createErrorResponse(err))
+		return
+	}
+	bs,err:=json.Marshal(tres)
+	if err!=nil{
+		w.Write(createErrorResponse(err))
+	}
+	w.Write(bs)
 }
+
+func getRequest(req *http.Request) ([]byte, error) {
+	if err := req.ParseForm(); err != nil {
+		log.Error(err)
+		return nil, errors.New("Unsupport Protocol Type!")
+	}
+	bs, err := ioutil.ReadAll(req.Body)
+	if err != nil || len(bs) == 0 {
+		log.Error(err)
+		return nil, errors.New("Unsupport Protocol Type!")
+	}
+	return bs, nil
+}
+

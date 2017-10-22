@@ -48,10 +48,35 @@ type History struct {
 	Status    string  `json:"status"`
 }
 
+/**
+{
+    "platform":"kraken", //can be 'kraken' or 'bitfinex'
+    "currency":"BTH", // it's the currency returned by the currencies api
+    "amount":34.9982,
+    "price":887.000293
+}
+*/
 type TradeReq struct {
+	Platform string  `json:"platform"`
+	Currency string  `json:"currency"`
+	Amount   float64 `json:"amount"`
+	Price    float64 `json:"price"`
 }
 
-type TradeRes struct {
+/**
+{
+  "status":"success",
+  "info":{
+    "tradeID":"123455djsdkh33"
+  }
 }
+*/
+type TradeRes struct {
+	Status string `json:"status"`
+	Info struct {
+		TradeID string `json:"tradeID"`
+	} `json:"info"`
+}
+
 
 type CurrenciesRes []string
